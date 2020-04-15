@@ -85,7 +85,7 @@ void GtNetB::readDatagrams()
             if(sz == (int)(_dtgrm.Size + TDatagram2_HEADER_LN ) ){
                 if (BB!=nullptr){
                     GtBuffer *D=BB->getBufferEx(_dtgrm.Type,_dtgrm.Name);
-                    if (D!=nullptr){
+                    if ((D!=nullptr)&& (!D->static_mode)){
                         // тут бы блокировку от чтения поставить
                         bool newdata=false;
                         if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) newdata=true;
@@ -214,7 +214,7 @@ int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &
 int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
 {
     emit bufferSend(B);
-    QThread::msleep(20);
+   // QThread::msleep(20);
     return 0;
 }
 

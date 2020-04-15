@@ -14,3 +14,6 @@ SOURCES += \
     $$PWD/gtcommandinterface.cpp
     
     
+
+DISTFILES += \
+    $$PWD/description.txt

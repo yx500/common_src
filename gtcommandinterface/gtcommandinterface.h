@@ -1,7 +1,8 @@
 #ifndef GTCOMMANDINTERFACE_H
 #define GTCOMMANDINTERFACE_H
 
-#include "QMap"
+#include <QMap>
+#include <QObject>
 #include "gtbuffer.h"
 
 class GtCommandInterface : public QObject
@@ -17,8 +18,8 @@ public:
     bool echo=false;
 
 signals:
-    void recv_cmd(QMap<QString,QString> &m);
-    void recv_accept(QMap<QString,QString> &m);
+    void recv_cmd(QMap<QString,QString> m);
+    void recv_accept(QMap<QString,QString> m);
 public slots:
     void bufferChanged(GtBuffer *B);
 protected:
