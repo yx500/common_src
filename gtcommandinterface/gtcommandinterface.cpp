@@ -92,16 +92,16 @@ QString GtCommandInterface::newUID()
 
 }
 
-QMap<QString, QString> GtCommandInterface::str2map( QString &S)
+QMap<QString, QString> GtCommandInterface::str2map( QString S)
 {
     //QString S2=S.replace("###",";");
     QStringList ls=S.split(";");
     QMap<QString,QString> m;
     foreach (auto &s, ls) {
-        ls.clear();
+
         QStringList ls1=s.split("=");
-        if (ls.size()==2){
-            m.insert(ls[0],ls[1]);
+        if (ls1.size()==2){
+            m.insert(ls1[0],ls1[1]);
         }
     }
     return m;

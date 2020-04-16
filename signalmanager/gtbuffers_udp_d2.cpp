@@ -138,6 +138,7 @@ void GtNetB::bufferSend(const GtBuffer *B)
     Data.Clear();
     Data.setName(B->getName().toLocal8Bit().data());
     Data.Type=B->getType();
+    Data.Size=B->A.size();
     Data.setData(B->A.data(),B->A.size());
     send(Data);
 }
@@ -164,7 +165,6 @@ void GtNetB::checkLiveStatus()
         }
         if (sost!=B->sost) {
             B->sost=sost;
-            B->emitBufferChanged();
         }
     }
 }
