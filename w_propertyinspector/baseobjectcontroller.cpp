@@ -62,6 +62,7 @@ class BaseObjectControllerPrivate
     BaseObjectController *q_ptr;
     Q_DECLARE_PUBLIC(BaseObjectController)
 public:
+    void addManager(QtVariantPropertyManager *manager, QtVariantEditorFactory *abstractFactory);
 
     void addClassProperties(const QMetaObject *metaObject);
     void addProperties();
@@ -78,8 +79,7 @@ public:
     bool isSubValue(int value, int subValue) const;
     bool isPowerOf2(int value) const;
 
-    //QPointer <QObject>                  m_object;
-    QObjectList                         m_objects;
+    QList<QPointer<QObject>>     m_objects;
     QStringList                         m_commonPropertyNames;
 
     QMap<const QMetaObject *, QtProperty *> m_classToProperty;
@@ -95,9 +95,6 @@ public:
     QtVariantPropertyManager *m_manager;
     QtVariantPropertyManager *m_readOnlyManager;
 
-    Int64PropertyManager *m_Int64PropertyManager;
-    ObjectLinkPropertyManager *m_ObjectLink_manager;
-    SignalDescriptionPropertyManager *m_SignalDescription_manager;
 
     QMap<QtProperty *, QString>     m_propertyToDPropertyName;
     QMap<QString ,QtProperty *>     m_DPropertyNameToproperty;
@@ -108,8 +105,18 @@ public:
     QtVariantProperty *makeQtVariantProperty(QMetaProperty metaProperty);
     QStringList expandedPropertyeNames;
     bool updateMode;
+    QList<QtVariantPropertyManager *> l_Managers;
 
 };
+
+void BaseObjectControllerPrivate::addManager(QtVariantPropertyManager *manager, QtVariantEditorFactory *abstractFactory)
+{
+    l_Managers.push_back(manager);
+    m_browser->setFactoryForManager(qobject_cast<QtVariantPropertyManager*>(manager), abstractFactory);
+
+
+}
+
 
 int BaseObjectControllerPrivate::enumToInt(const QMetaEnum &metaEnum, int enumValue) const
 {
@@ -343,21 +350,22 @@ QtVariantProperty *BaseObjectControllerPrivate::makeQtVariantProperty(QMetaPrope
 //            subProperty->propertyManager()->blockSignals(false);
         }
     } else {
-        if (m_manager->isPropertyTypeSupported(type)) {
-            if (!metaProperty.isWritable())
-                subProperty = m_readOnlyManager->addProperty(type, QLatin1String(metaProperty.name()) + QLatin1String(" (Non Writable)"));
-            if (!metaProperty.isDesignable())
-                subProperty = m_readOnlyManager->addProperty(type, QLatin1String(metaProperty.name()) + QLatin1String(" (Non Designable)"));
-            else
-                subProperty = m_manager->addProperty(type, QLatin1String(metaProperty.name()));
-        } else if (m_Int64PropertyManager->isPropertyTypeSupported(type)) {
-            subProperty = m_Int64PropertyManager->addProperty(type, QLatin1String(metaProperty.name()));
-        } else if (m_ObjectLink_manager->isPropertyTypeSupported(type)) {
-            subProperty = m_ObjectLink_manager->addProperty(type, QLatin1String(metaProperty.name()));
-        } else if (m_SignalDescription_manager->isPropertyTypeSupported(type)) {
-            subProperty = m_SignalDescription_manager->addProperty(type, QLatin1String(metaProperty.name()));
-        }
-        else
+            bool unknownType=true;
+
+            foreach (auto manager, l_Managers) {
+                if (manager->isPropertyTypeSupported(type)) {
+                    unknownType=false;
+                    if (!metaProperty.isWritable())
+                        subProperty = m_readOnlyManager->addProperty(type, QLatin1String(metaProperty.name()) + QLatin1String(" (Non Writable)"));
+                    if (!metaProperty.isDesignable())
+                        subProperty = m_readOnlyManager->addProperty(type, QLatin1String(metaProperty.name()) + QLatin1String(" (Non Designable)"));
+                    else
+                        subProperty = manager->addProperty(type, QLatin1String(metaProperty.name()));
+                    break;
+            }
+            }
+
+                if (unknownType)
         {
             subProperty = m_readOnlyManager->addProperty(QVariant::String, QLatin1String(metaProperty.name()));
             subProperty->setValue(QLatin1String("< Unknown Type >"));
@@ -450,6 +458,8 @@ void BaseObjectControllerPrivate::addProperties()
             QtVariantProperty *subProperty = makeQtVariantProperty(metaProperty);
             QString property_group=MVP_ObjectFactory::instance()->property_group(metaObject,metaProperty.name());
             subProperty->setPropertyRusName(MVP_ObjectFactory::instance()->property_rusname(metaObject,metaProperty.name()));
+            //subProperty->setPropertyName(MVP_ObjectFactory::instance()->property_rusname(metaObject,metaProperty.name()));
+
             QString property_tooltip=QString("%1\r\n[%2]").arg(MVP_ObjectFactory::instance()->property_toolTip(metaObject,metaProperty.name())).arg(subProperty->propertyName());
             subProperty->setToolTip(property_tooltip);
 
@@ -631,37 +641,16 @@ BaseObjectController::BaseObjectController(QWidget *parent)
     d_ptr->m_readOnlyManager = new QtVariantPropertyManager(this);
     d_ptr->m_manager = new QtVariantPropertyManager(this);
     QtVariantEditorFactory *factory = new QtVariantEditorFactory(this);
-    d_ptr->m_browser->setFactoryForManager(d_ptr->m_manager, factory);
-
-    connect(d_ptr->m_manager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
-                this, SLOT(slotValueChanged(QtProperty *, const QVariant &)));
-
-
-    d_ptr->m_Int64PropertyManager = new Int64PropertyManager(this);
-    d_ptr->m_ObjectLink_manager = new ObjectLinkPropertyManager(this);
-    d_ptr->m_SignalDescription_manager = new SignalDescriptionPropertyManager(this);
+    d_ptr->addManager(d_ptr->m_manager,factory);
+    d_ptr->addManager(new Int64PropertyManager(this),new Int64EditorFactory(this));
+    d_ptr->addManager(new ObjectLinkPropertyManager,new ObjectLinkEditorFactory(this));
+    d_ptr->addManager(new SignalDescriptionPropertyManager(this),factory);
 
 
-    Int64EditorFactory*factory2 = new Int64EditorFactory(this);
-    d_ptr->m_browser->setFactoryForManager(qobject_cast<QtVariantPropertyManager*>(d_ptr->m_Int64PropertyManager), factory2);
-
-    QtVariantEditorFactory *factory3 = new QtVariantEditorFactory(this);
-    d_ptr->m_browser->setFactoryForManager(qobject_cast<QtVariantPropertyManager*>(d_ptr->m_SignalDescription_manager), factory3);
-
-
-
-    ObjectLinkEditorFactory *factory4 = new ObjectLinkEditorFactory(this);
-    d_ptr->m_browser->setFactoryForManager(qobject_cast<QtVariantPropertyManager*>(d_ptr->m_ObjectLink_manager), factory4);
-
-
-    connect(d_ptr->m_Int64PropertyManager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
-                this, SLOT(slotValueChanged(QtProperty *, const QVariant &)));
-    connect(d_ptr->m_ObjectLink_manager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
-                this, SLOT(slotValueChanged(QtProperty *, const QVariant &)));
-    connect(d_ptr->m_SignalDescription_manager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
-                this, SLOT(slotValueChanged(QtProperty *, const QVariant &)));
-
-
+    foreach (auto manager, d_ptr->l_Managers ) {
+        connect(manager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
+                    this, SLOT(slotValueChanged(QtProperty *, const QVariant &)));
+    }
 }
 
 BaseObjectController::~BaseObjectController()
@@ -669,67 +658,19 @@ BaseObjectController::~BaseObjectController()
     delete d_ptr;
 }
 
-//void BaseObjectController::setObject(QObject *object)
-//{
-//    if (d_ptr->m_object == object)
-//        return;
-
-
-
-
-
-
-
-//    if (d_ptr->m_object) {
-//        d_ptr->saveExpandedState();
-//        QListIterator<QtProperty *> it(d_ptr->m_topLevelProperties);
-//        while (it.hasNext()) {
-//            d_ptr->m_browser->removeProperty(it.next());
-//        }
-////        for (int i=0;i<d_ptr->m_topLevelProperties.size();i++)
-////                delete d_ptr->m_topLevelProperties[i];
-//        d_ptr->m_topLevelProperties.clear();
-//    }
-
-//    d_ptr->m_propertyToDPropertyName.clear();
-//    d_ptr->m_DPropertyNameToproperty.clear();
-
-////    d_ptr->m_manager->clear();
-////    d_ptr->m_readOnlyManager->clear();
-////    d_ptr->m_quint64_manager->clear();
-////    d_ptr->m_ObjectLink_manager->clear();
-////    d_ptr->m_SignalDescription_manager->clear();
-
-//    d_ptr->m_classToIndexToProperty.clear();
-//    d_ptr->m_classToProperty.clear();
-//    d_ptr->m_propertyToClass.clear();
-//    d_ptr->m_propertyToIndex.clear();
-
-
-
-//    d_ptr->m_object = object;
-
-//    if (!d_ptr->m_object)
-//        return;
-
-//    blockSignals(true);
-//    if (d_ptr->m_object->dynamicPropertyNames().size()>0)
-//        d_ptr->addClassDynamicProperties(d_ptr->m_object); else
-
-
-//    d_ptr->m_allProperties.clear();
-//    d_ptr->addClassProperties(d_ptr->m_object->metaObject());
-
-//    d_ptr->restoreExpandedState();
-
-//    blockSignals(false);
-//}
 
 void BaseObjectController::setObjects(QObjectList l)
 {
-    if (d_ptr->m_objects!=l){
+    QList<QPointer<QObject>>     m_newobjects;
+    foreach (auto o, l) {
+        m_newobjects.push_back(QPointer<QObject>(o));
+    }
+    if (d_ptr->m_objects!=m_newobjects){
+        foreach (QObject *o, d_ptr->m_objects) {
+            o->disconnect(this);
+        }
         if (d_ptr->m_objects.size()!=0) d_ptr->saveExpandedState();
-        d_ptr->m_objects=l;
+        d_ptr->m_objects=m_newobjects;
         d_ptr->m_commonPropertyNames.clear();
         // список общих свойств
         QStringList commonPropertyes;
@@ -776,6 +717,14 @@ void BaseObjectController::setObjects(QObjectList l)
         d_ptr->addProperties();
         d_ptr->updateProperties();
         d_ptr->restoreExpandedState();
+        foreach (QObject *o, l) {
+            BaseObject *b=qobject_cast<BaseObject*>(o);
+            if (b){
+                connect(b,&BaseObject::propertyChanged,this,&BaseObjectController::propertyChanged);
+                connect(b,&BaseObject::stateChanged,this,&BaseObjectController::propertyChanged);
+            }
+        }
+
 
         blockSignals(false);
     }
@@ -783,7 +732,12 @@ void BaseObjectController::setObjects(QObjectList l)
 
 QObjectList BaseObjectController::objects() const
 {
-    return d_ptr->m_objects;
+    QObjectList l;
+    foreach (auto p, d_ptr->m_objects) {
+        if (!p.isNull()) l.push_back(p.data());
+    }
+
+    return l;
 }
 
 void BaseObjectController::setOnlyState(bool p)
@@ -795,6 +749,8 @@ int BaseObjectController::topLevelPropertiesCount()
 {
     return  d_ptr->m_topLevelProperties.size();
 }
+
+
 
 void BaseObjectController::propertyChanged(QObject *object)
 {

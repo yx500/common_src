@@ -205,7 +205,6 @@ int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &
     static GtBuffer B;
     B.setType(type);
     B.setName(name);
-    const char *d=reinterpret_cast<const char *>(A.data());
     B.A=A;// setData(d,sz);
     emit bufferSend(&B);
     return 0;

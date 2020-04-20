@@ -43,6 +43,8 @@
 
 #include <QWidget>
 class BaseObjectControllerPrivate;
+class QtAbstractPropertyManager;
+class QtVariantEditorFactory;
 
 class  BaseObjectController : public QWidget
 {
@@ -63,6 +65,7 @@ signals:
     void propertyChange(QObject *object);
 private:
     BaseObjectControllerPrivate *d_ptr;
+    QList<QtAbstractPropertyManager*> l_Managers;
     Q_DECLARE_PRIVATE(BaseObjectController)
     Q_DISABLE_COPY(BaseObjectController)
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QVariant &))
