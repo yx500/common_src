@@ -51,6 +51,8 @@
 #include "int64propertymanager.h"
 #include "objectlinkpropertymanager.h"
 #include "signaldescriptionpropertymanager.h"
+#include "qvarinathashpropertymanager.h"
+#include "qvarianthasheditorfactory.h"
 
 #include "objectlinkeditorfactory.h"
 #include "int64editorfactory.h"
@@ -645,7 +647,7 @@ BaseObjectController::BaseObjectController(QWidget *parent)
     d_ptr->addManager(new Int64PropertyManager(this),new Int64EditorFactory(this));
     d_ptr->addManager(new ObjectLinkPropertyManager,new ObjectLinkEditorFactory(this));
     d_ptr->addManager(new SignalDescriptionPropertyManager(this),factory);
-
+    d_ptr->addManager(new QVarinatHashPropertyManager,new QVariantHashEditorFactory(this));
 
     foreach (auto manager, d_ptr->l_Managers ) {
         connect(manager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),

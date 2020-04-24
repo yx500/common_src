@@ -10,6 +10,9 @@ HEADERS += \
     $$PWD/objectlinkpropertymanager.h \
     $$PWD/objectlinkeditorfactory.h \
     $$PWD/int64propertymanager.h \
+    $$PWD/qtvarianthasheditwidget.h \
+    $$PWD/qvarianthasheditorfactory.h \
+    $$PWD/qvarinathashpropertymanager.h \
     $$PWD/signaldescriptionpropertymanager.h \
     $$PWD/int64editorfactory.h\
     $$PWD/wdgpropertyinspector.h \
@@ -20,6 +23,9 @@ SOURCES += \
     $$PWD/objectlinkpropertymanager.cpp \
     $$PWD/objectlinkeditorfactory.cpp\
     $$PWD/int64propertymanager.cpp \
+    $$PWD/qtvarianthasheditwidget.cpp \
+    $$PWD/qvarianthasheditorfactory.cpp \
+    $$PWD/qvarinathashpropertymanager.cpp \
     $$PWD/signaldescriptionpropertymanager.cpp \
     $$PWD/int64editorfactory.cpp \
     $$PWD/wdgpropertyinspector.cpp \
