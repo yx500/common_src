@@ -15,10 +15,17 @@ unix: {
                         TARGET = propertyinspector
                 }
 } else {
-                TARGET = $$qtLibraryTarget(propertyinspector)
+                #TARGET = $$qtLibraryTarget(propertyinspector)
+                CONFIG (debug, debug|release) {
+                        # Такое название имеет debug-версия библиотеки
+                        TARGET = propertyinspectord
+                } else {
+                        # А такое release-версия
+                        TARGET = propertyinspector
+                }
 }
 
-win32|mac:!wince*:!win32-msvc:!macx-xcode:CONFIG += debug_and_release build_all
+#win32|mac:!wince*:!win32-msvc:!macx-xcode:CONFIG += debug_and_release build_all
 
 
 include(../../../_ext/qt-solutions-master/qtpropertybrowser/src/qtpropertybrowser.pri)

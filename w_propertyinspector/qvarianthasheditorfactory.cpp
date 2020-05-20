@@ -2,7 +2,7 @@
 
 #include "qtvarianthasheditwidget.h"
 
-
+#include "mvp_system.h"
 
 
 
@@ -28,8 +28,6 @@ void QVariantHashEditorFactory::connectPropertyManager(QtVariantPropertyManager 
             this, SLOT(slotPropertyChanged(QtProperty *, QVariant)));
 }
 
-QString QVariantHashToQString(const QVariantHash &h);
-QVariantHash QStringToQVariantHash(const QString &s);
 
 QWidget *QVariantHashEditorFactory::createEditor(QtVariantPropertyManager *manager, QtProperty *property, QWidget *parent)
 {
@@ -39,7 +37,7 @@ QWidget *QVariantHashEditorFactory::createEditor(QtVariantPropertyManager *manag
     //ObjectLink p = manager->value(property).value<ObjectLink>();
      editor = new QtVariantHashEditWidget(parent);
     QVariantHash h=manager->value(property).toHash();
-    editor->setValue(QVariantHashToQString(h));
+    editor->setValue(MVP_System::QVariantHashToQString(h));
 
     connect(editor, &QtVariantHashEditWidget::valueChanged, this, &QVariantHashEditorFactory::slotSetValue);
     connect(editor, SIGNAL(destroyed(QObject *)),
@@ -63,7 +61,7 @@ void QVariantHashEditorFactory::slotPropertyChanged(QtProperty *property, QVaria
     if (editor->m_text != value.toString()) {
             editor->blockSignals(true);
             QVariantHash h=value.toHash();
-            editor->setValue( QVariantHashToQString(h));
+            editor->setValue( MVP_System::QVariantHashToQString(h));
             editor->blockSignals(false);
     }
 }
@@ -72,7 +70,7 @@ void QVariantHashEditorFactory::slotSetValue(QString value)
 {
     if (!editorManager) return;
     if (!editorProperty) return;
-    QVariantHash p=QStringToQVariantHash(value);
+    QVariantHash p=MVP_System::QStringToQVariantHash(value);
 
     QVariant v=p;
         editorManager->setValue(editorProperty, v);

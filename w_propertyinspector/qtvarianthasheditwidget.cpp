@@ -20,6 +20,8 @@
 #include <QTableWidget>
 #include <QDialogButtonBox>
 
+#include "mvp_system.h"
+
 QtVariantHashEditWidget::QtVariantHashEditWidget(QWidget *parent) :
     QWidget(parent),
     m_edit(new QLineEdit),
@@ -63,8 +65,6 @@ void  QtVariantHashEditWidget::slotTextEdited(const QString &value)
     emit valueChanged(m_text);
 }
 
-QString QVariantHashToQString(const QVariantHash &h);
-QVariantHash QStringToQVariantHash(const QString &s);
 
 void QtVariantHashEditWidget::buttonClicked()
 {
@@ -74,7 +74,7 @@ void QtVariantHashEditWidget::buttonClicked()
     lt->setSpacing(1);
     QTableWidget *t=new QTableWidget();
     t->setColumnCount(2);
-    QVariantHash h=QStringToQVariantHash(m_text);
+    QVariantHash h=MVP_System::QStringToQVariantHash(m_text);
     t->setRowCount(h.count());
     int row=0;
     QStringList keys=h.keys();
@@ -101,7 +101,7 @@ void QtVariantHashEditWidget::buttonClicked()
         for (int row=0;row<t->rowCount();row++){
             hh[t->item(row,0)->text()]=t->item(row,1)->text();
         }
-        QString s=QVariantHashToQString(hh);
+        QString s=MVP_System::QVariantHashToQString(hh);
         if (s!=m_text){
             setValue(s);
             emit valueChanged(s);

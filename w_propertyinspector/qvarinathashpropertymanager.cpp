@@ -1,4 +1,5 @@
 #include "qvarinathashpropertymanager.h"
+#include "mvp_system.h"
 
 QVarinatHashPropertyManager::QVarinatHashPropertyManager(QObject *parent) : QtVariantPropertyManager(parent)
 {
@@ -28,14 +29,12 @@ bool QVarinatHashPropertyManager::isPropertyTypeSupported(int propertyType) cons
     return QtVariantPropertyManager::isPropertyTypeSupported(propertyType);
 }
 
-QString QVariantHashToQString(const QVariantHash &h);
-QVariantHash QStringToQVariantHash(const QString &s);
 
 QString QVarinatHashPropertyManager::valueText(const QtProperty *property) const
 {
     if (propertyToData.contains(property)) {
         QVariantHash p = propertyToData[property];
-        QString s=QVariantHashToQString(p);
+        QString s=MVP_System::QVariantHashToQString(p);
         return s;
     }
     return QtVariantPropertyManager::valueText(property);

@@ -66,7 +66,7 @@ QList<IArchiveReader::TArchiveSrc> ArchiveReaderDTG::findArchiveSrc(QString path
                         }
                         if (!exchanel) continue;
 
-                        QDate FD=fileInfo.created().date();
+                        QDate FD=fileInfo.birthTime().date();
                         TArchiveSrc asrc;
                         asrc.reader=this;
                         asrc.T1=QDateTime(FD);

@@ -56,7 +56,7 @@
 
 #include "objectlinkeditorfactory.h"
 #include "int64editorfactory.h"
-#include "mvp_objectfactory.h"
+#include "mvp_system.h"
 #include "baseobjecttools.h"
 
 class BaseObjectControllerPrivate
@@ -281,14 +281,14 @@ void BaseObjectControllerPrivate::updateProperties()
             }
             // проверяем на разные значения
             QString valstr;
-            if (MVP_ObjectFactory::instance()->QVariantToQString(val,valstr)){
+            if (MVP_System::QVariantToQString(val,valstr)){
                 foreach (QObject *m_object, m_objects) {
                     int idx2=m_object->metaObject()->indexOfProperty(qPrintable(subProperty->propertyName()));
                     if (idx>=0){
                         QMetaProperty metaProperty2 = m_object->metaObject()->property(idx2);
                         QVariant val1=metaProperty2.read(m_object);
                         QString valstr1;
-                        if (MVP_ObjectFactory::instance()->QVariantToQString(val1,valstr1)){
+                        if (MVP_System::QVariantToQString(val1,valstr1)){
                             if (valstr!=valstr1){
                                 QtTreePropertyBrowser *tree_browser=qobject_cast<QtTreePropertyBrowser *>(m_browser);
                                 if (tree_browser){
@@ -457,7 +457,15 @@ void BaseObjectControllerPrivate::addProperties()
                 if (!metaProperty.isStored()) continue;
             }
             if (!metaProperty.isDesignable()) continue;
-            QtVariantProperty *subProperty = makeQtVariantProperty(metaProperty);
+            QtVariantProperty *subProperty =nullptr;
+            if (metaProperty.userType()==QMetaType::QVariant){
+                QVariant v=m_objects.first()->property(qPrintable(propertyName));
+                int type=v.type();
+                subProperty = m_manager->addProperty(type, propertyName);
+                subProperty->setValue(v);
+            } else {
+             subProperty=makeQtVariantProperty(metaProperty);
+            }
             QString property_group=MVP_ObjectFactory::instance()->property_group(metaObject,metaProperty.name());
             subProperty->setPropertyRusName(MVP_ObjectFactory::instance()->property_rusname(metaObject,metaProperty.name()));
             //subProperty->setPropertyName(MVP_ObjectFactory::instance()->property_rusname(metaObject,metaProperty.name()));

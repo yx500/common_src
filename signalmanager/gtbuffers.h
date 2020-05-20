@@ -21,10 +21,13 @@ public:
 
     GtBuffer *getGtBuffer(int type,const QString &name) override
     {
+
+        if (type<0) return nullptr;
         if (m_TypeToNameToBD.contains(type))
             if (m_TypeToNameToBD[type].contains(name))
                 return m_TypeToNameToBD[type][name];
 
+        if (name.isEmpty()) return nullptr;
         GtBuffer *D=new GtBuffer(this);
         D->setName(name);
         D->setType(type);
