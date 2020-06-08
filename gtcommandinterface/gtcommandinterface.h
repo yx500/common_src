@@ -14,7 +14,7 @@ public:
     QString SRC_ID() const {return FSRC_ID;}
     int send_cmd(QString DEST, const QMap<QString,QString> &m);
     int send_cmd(const QMap<QString,QString> &m);
-    int accept_cmd(const QMap<QString,QString> &m,QString accept_str);
+    int accept_cmd(const QMap<QString,QString> &m, int status, QString accept_str);
     QMap<QString,QString> str2map(QString S);
     QString map2str(QMap<QString,QString> &m);
     bool echo=false;

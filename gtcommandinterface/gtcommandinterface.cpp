@@ -46,14 +46,15 @@ int GtCommandInterface::send_cmd(const QMap<QString, QString> &m)
     return 0;
 }
 
-int GtCommandInterface::accept_cmd(const QMap<QString, QString> &m, QString accept_str)
+int GtCommandInterface::accept_cmd(const QMap<QString, QString> &m, int status,QString accept_str)
 {
     QMap<QString, QString> _m=m;
     _m["ACCEPT_SRC"]=FSRC_ID;
+    _m["ACCEPT_CODE"]=status;
     _m["ACCEPT_TXT"]=accept_str;
     QString S=map2str(_m);
     _B2.clearData();
-    _B2.setType(100);
+    _B2.setType(102);
     _B2.setName("gt_rtu_0");
     _B2.A=S.toUtf8();
     if (_B2.A.size()>buffers->maxSizeData()) return -1;
