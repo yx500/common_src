@@ -35,8 +35,8 @@ QString ObjectLinkPropertyManager::valueText(const QtProperty *property) const
         ObjectLink p = propertyToData[property];
         QString s=p.toString();
         if (!s.isEmpty()){
-            if (p.obj()!=0)
-                return p.obj()->objectName();
+            if (p.baseObject()!=0)
+                return p.baseObject()->objectName();
             return "0 ["+s+"]";
         }
         return s;
@@ -52,7 +52,7 @@ void ObjectLinkPropertyManager::setValue(QtProperty *property, const QVariant &v
             return;
         ObjectLink p = val.value<ObjectLink>();
         ObjectLink d = propertyToData[property];
-        if ((d.id()!=p.id())||(d.isNotUse()!=p.isNotUse())||(d.obj()!=p.obj())){
+        if ((d.id()!=p.id())||(d.isNotUse()!=p.isNotUse())){
             d=p;
             propertyToData[property] = d;
             QVariant v;

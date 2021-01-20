@@ -23,10 +23,10 @@ void SignalDescriptionTextInterface::addSearchDir(const QString &dir)
     if (lSearchDirs.indexOf(dir)<0)  lSearchDirs.push_back(dir);
 }
 
-bool SignalDescriptionTextInterface::addChanel(const int chanelType, const QString &chanelName, QString fileName)
+SignalDescriptionTextInterface::ChanelTextData* SignalDescriptionTextInterface::addChanel(const int chanelType, const QString &chanelName, QString fileName)
 {
     foreach (SignalDescriptionTextInterface::ChanelTextData*d, lTextData) {
-        if ((d->ChanelType==chanelType)&&(d->ChanelName==chanelName)) return true;
+        if ((d->ChanelType==chanelType)&&(d->ChanelName==chanelName)) return d;
     }
     SignalDescriptionTextInterface::ChanelTextData *d=new SignalDescriptionTextInterface::ChanelTextData;
     d->ChanelType=chanelType;
@@ -49,7 +49,17 @@ bool SignalDescriptionTextInterface::addChanel(const int chanelType, const QStri
 
         }
     }
-    return true;
+    return d;
+}
+
+bool SignalDescriptionTextInterface::saveChanel(const int chanelType, const QString &chanelName, QString fileName)
+{
+    foreach (SignalDescriptionTextInterface::ChanelTextData*d, lTextData) {
+        if ((d->ChanelType==chanelType)&&(d->ChanelName==chanelName)) {
+            return d->saveCSV(fileName);
+        }
+    }
+    return false;
 }
 
 
@@ -101,15 +111,22 @@ void SignalDescriptionTextInterface::setText(const int chanelType, const QString
 {
     foreach (ChanelTextData *chanelTextData, lTextData) {
         if ((chanelTextData->ChanelType==chanelType) && (chanelTextData->ChanelName==chanelName)){
-            if ((chanelOffset>=chanelTextData->lSignalText.size())){
-                int cntadd=chanelOffset-chanelTextData->lSignalText.size()+1;
-                for (int in=0;in<cntadd;in++) chanelTextData->lSignalText.push_back(SignalTextData());
-            }
+            chanelTextData->setText(chanelOffset, role, text);
         }
-        SignalTextData &sd=chanelTextData->lSignalText[chanelOffset];
-        sd.data[role]=text;
     }
 }
+
+void SignalDescriptionTextInterface::ChanelTextData::setText(const int chanelOffset, int role, QString text)
+{
+    if ((chanelOffset>=lSignalText.size())){
+        int cntadd=chanelOffset-lSignalText.size()+1;
+        for (int in=0;in<cntadd;in++) lSignalText.push_back(SignalTextData());
+    }
+    SignalTextData &sd=lSignalText[chanelOffset];
+    sd.data[role]=text;
+}
+
+
 int SignalDescriptionTextInterface::getTextCount(const int chanelType, const QString &chanelName) const
 {
     foreach (ChanelTextData *chanelTextData, lTextData) {
@@ -206,8 +223,11 @@ bool SignalDescriptionTextInterface::ChanelTextData::loadCSV(const QString &file
     return true;
 }
 
-bool SignalDescriptionTextInterface::ChanelTextData::saveCSV(const QString &fileName)
+bool SignalDescriptionTextInterface::ChanelTextData::saveCSV(QString fileName)
 {
+    if (fileName==""){
+        fileName=QString("%1_%2").arg(ChanelType).arg(ChanelName);
+    }
     QStringList sl;
     sl.push_back("п/п,тип,обозначение,имя");
     for (int i=0;i<lSignalText.size() ;i++){
@@ -225,6 +245,7 @@ bool SignalDescriptionTextInterface::ChanelTextData::saveCSV(const QString &file
     return false;
 
 }
+
 
 QVector<SignalDescription> SignalDescriptionTextInterface::FindSignals(QString tsName) const
 {
