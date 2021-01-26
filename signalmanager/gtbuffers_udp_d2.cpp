@@ -98,9 +98,10 @@ void GtNetB::readDatagrams()
                                 D->A.resize(_dtgrm.Size);
                             }
                             memcpy(D->A.data(),&_dtgrm.Data,_dtgrm.Size);
+                            // тут бы блокировку от чтения снять
+                            D->emitBufferChanged();
                         }
-                        // тут бы блокировку от чтения снять
-                        D->emitBufferChanged();
+
                     }
                 }
                 emit dtgrmRecived( _dtgrm,sender, senderPort );
