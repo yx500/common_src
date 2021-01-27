@@ -156,14 +156,14 @@ void GtNetB::checkLiveStatus()
     if (BB==nullptr) return;
     QDateTime curTime=QDateTime::currentDateTime();
     foreach (GtBuffer *B, BB->allBuffers()) {
-        int sost=0;
-        if (B->timeDataRecived.isValid()){
-            if ((B->msecPeriodLive>0)&&(B->timeDataRecived.msecsTo(curTime)>B->msecPeriodLive)){
-                sost=GtBuffer::_error;
-            } else {
-                sost=GtBuffer::_alive;
+        int sost=GtBuffer::_error;
+        if (B->msecPeriodLive>0){
+            if (B->timeDataRecived.isValid()){
+                if ((B->timeDataRecived.msecsTo(curTime)<=B->msecPeriodLive)){
+                    sost=GtBuffer::_alive;
+                }
             }
-        }
+        } else sost=GtBuffer::_alive;
         if (sost!=B->sost) {
             B->sost=sost;
         }
@@ -214,7 +214,7 @@ int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &
 int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
 {
     emit bufferSend(B);
-   // QThread::msleep(20);
+    // QThread::msleep(20);
     return 0;
 }
 
