@@ -3,6 +3,7 @@
 GtCommandInterface::GtCommandInterface(QObject *parent, IGtBufferInterface *buffers) : QObject(parent)
 {
     this->buffers=buffers;
+    cmd_count++;
     //генерим случайный ид срц
     FSRC_ID=QString::number(QDateTime::currentDateTime().msecsTo(QDateTime(QDate(2019,01,01),QTime(0,0))) % 1000);
     GtBuffer *B1=buffers->getGtBuffer(100,"gt_tu_0");
@@ -14,6 +15,7 @@ int GtCommandInterface::send_cmd(QString DEST, const QMap<QString, QString> &m)
 {
     QMap<QString, QString> _m=m;
     _m["DEST"]=DEST;
+    _m["CNT"]=QString::number(++cmd_count);
     send_cmd(_m);
     return 0;
 }

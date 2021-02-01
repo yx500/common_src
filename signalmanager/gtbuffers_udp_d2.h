@@ -31,8 +31,7 @@ public:
     size_t send(const TDatagram2& dtgrm);
 
 signals:
-    void dtgrmRecived(const TDatagram2& Data,const QHostAddress &sender,const quint16  &senderPort);
-    void bufferChanged(GtBuffer *B);
+    void changeBuffer(GtBuffer *B,TDatagram2 dtgrm);
 
 public slots:
     //void dtgrmDataSend(const TDatagram2& Data);
@@ -67,6 +66,7 @@ public:
     int maxSizeData() override {return TDatagram2_DATA_LN;}
 
 public slots:
+    void bufferChanged(GtBuffer *B,TDatagram2 dtgrm);
 
 signals:
 void bufferSend(const GtBuffer *B);

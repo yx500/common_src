@@ -86,25 +86,14 @@ void GtNetB::readDatagrams()
                 if (BB!=nullptr){
                     GtBuffer *D=BB->getBufferEx(_dtgrm.Type,_dtgrm.Name);
                     if ((D!=nullptr)&& (!D->static_mode)){
-                        // тут бы блокировку от чтения поставить
-                        bool newdata=false;
-                        if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) newdata=true;
                         D->timeDataRecived=QDateTime::currentDateTime();
-                        D->tick++;
-                        if (newdata){
-                            D->timeDataChanged=D->timeDataRecived;
-                            if (D->A.size()!=_dtgrm.Size) {
-                                D->A.clear();
-                                D->A.resize(_dtgrm.Size);
-                            }
-                            memcpy(D->A.data(),&_dtgrm.Data,_dtgrm.Size);
-                            // тут бы блокировку от чтения снять
-                            D->emitBufferChanged();
+                        // тут бы блокировку от чтения поставить
+                        if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) {
+                            emit changeBuffer(D,_dtgrm);
                         }
-
                     }
+
                 }
-                emit dtgrmRecived( _dtgrm,sender, senderPort );
             }
         } else {
             QByteArray dat;
@@ -177,6 +166,7 @@ GtBuffers_UDP_D2::GtBuffers_UDP_D2(QObject *parent)
     :GtBuffers(parent)
 {
     gtNetB =new GtNetB(nullptr,this);
+    connect(gtNetB,&GtNetB::changeBuffer,this,&GtBuffers_UDP_D2::bufferChanged);
     connect(this,&GtBuffers_UDP_D2::bufferSend,gtNetB,&GtNetB::bufferSend);
     //initSockets();
     gtNetB->start();
@@ -216,6 +206,20 @@ int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
     emit bufferSend(B);
     // QThread::msleep(20);
     return 0;
+}
+
+void GtBuffers_UDP_D2::bufferChanged(GtBuffer *B, TDatagram2 dtgrm)
+{
+
+    B->tick++;
+    B->timeDataChanged=B->timeDataRecived;
+    if (B->A.size()!=dtgrm.Size) {
+        B->A.clear();
+        B->A.resize(dtgrm.Size);
+    }
+    memcpy(B->A.data(),&dtgrm.Data,dtgrm.Size);
+    // тут бы блокировку от чтения снять
+    B->emitBufferChanged();
 }
 
 

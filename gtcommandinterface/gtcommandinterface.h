@@ -32,6 +32,7 @@ protected:
     GtBuffer _B0;
     GtBuffer _B2;
     QList<QString> l_sended_rtu;
+    int cmd_count;
 
 };
 
