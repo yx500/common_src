@@ -31,6 +31,7 @@ public:
         GtBuffer *D=new GtBuffer(this);
         D->setName(name);
         D->setType(type);
+        D->setSizeData(maxSizeData());
         vbd.push_back(D);
         m_TypeToNameToBD[type][name]=D;
         emit buffersListChanged(this);

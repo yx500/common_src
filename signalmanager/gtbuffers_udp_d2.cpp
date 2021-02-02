@@ -165,6 +165,7 @@ void GtNetB::checkLiveStatus()
 GtBuffers_UDP_D2::GtBuffers_UDP_D2(QObject *parent)
     :GtBuffers(parent)
 {
+    qRegisterMetaType<TDatagram2>("TDatagram2");
     gtNetB =new GtNetB(nullptr,this);
     connect(gtNetB,&GtNetB::changeBuffer,this,&GtBuffers_UDP_D2::bufferChanged);
     connect(this,&GtBuffers_UDP_D2::bufferSend,gtNetB,&GtNetB::bufferSend);
