@@ -14,6 +14,7 @@ GtNetB::GtNetB(QObject *parent,GtBuffers *BB) :
     timerrReadDatagrams=nullptr;
 #endif
     this->BB=BB;
+    emit_counter=0;
     socketRead=nullptr;
     socketSend=nullptr;
     Open( _maddr, _port );
@@ -89,6 +90,7 @@ void GtNetB::readDatagrams()
                         D->timeDataRecived=QDateTime::currentDateTime();
                         // тут бы блокировку от чтения поставить
                         if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) {
+                            emit_counter++;
                             emit changeBuffer(D,_dtgrm);
                         }
                     }
@@ -209,9 +211,16 @@ int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
     return 0;
 }
 
+int GtBuffers_UDP_D2::emit_counter() const
+{
+    if (gtNetB!=nullptr) return gtNetB->emit_counter;
+    return 0;
+}
+
 void GtBuffers_UDP_D2::bufferChanged(GtBuffer *B, TDatagram2 dtgrm)
 {
 
+    if (gtNetB!=nullptr) gtNetB->emit_counter--;
     B->tick++;
     B->timeDataChanged=B->timeDataRecived;
     if (B->A.size()!=dtgrm.Size) {

@@ -5,6 +5,7 @@
 
 #include <QThread>
 #include <QtNetwork>
+#include <QAtomicInteger>
 #include "dmpacket2.h"
 
 /*
@@ -29,6 +30,8 @@ public:
     virtual ~GtNetB() override;
     void run() override ;
     size_t send(const TDatagram2& dtgrm);
+    QAtomicInteger<int> emit_counter;
+
 
 signals:
     void changeBuffer(GtBuffer *B,TDatagram2 dtgrm);
@@ -64,7 +67,7 @@ public:
     int sendData(int type,const QString &name,const QByteArray &A);
     int sendGtBuffer(const GtBuffer *B) override;
     int maxSizeData() override {return TDatagram2_DATA_LN;}
-
+    int emit_counter() const;
 public slots:
     void bufferChanged(GtBuffer *B,TDatagram2 dtgrm);
 

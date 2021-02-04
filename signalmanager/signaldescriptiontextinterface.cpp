@@ -226,7 +226,7 @@ bool SignalDescriptionTextInterface::ChanelTextData::loadCSV(const QString &file
 bool SignalDescriptionTextInterface::ChanelTextData::saveCSV(QString fileName)
 {
     if (fileName==""){
-        fileName=QString("%1_%2").arg(ChanelType).arg(ChanelName);
+        fileName=QString("%1_%2.csv").arg(ChanelType).arg(ChanelName);
     }
     QStringList sl;
     sl.push_back("п/п,тип,обозначение,имя");
