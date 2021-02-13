@@ -3,6 +3,8 @@
 
 #include <utility>
 
+QAtomicInteger<int> emit_counter;
+
 
 static QHostAddress _maddr("224.168.123.4");
 static quint16 _port=12347;//12350
@@ -86,7 +88,7 @@ void GtNetB::readDatagrams()
             if(sz == (int)(_dtgrm.Size + TDatagram2_HEADER_LN ) ){
                 if (BB!=nullptr){
                     GtBuffer *D=BB->getBufferEx(_dtgrm.Type,_dtgrm.Name);
-                    if ((D!=nullptr)&& (!D->static_mode)){
+                    if ((D!=nullptr)&& (!D->static_mode)&&(!D->shared_mem)){
                         D->timeDataRecived=QDateTime::currentDateTime();
                         // тут бы блокировку от чтения поставить
                         if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) {
@@ -124,15 +126,9 @@ size_t GtNetB::send(const TDatagram2& dtgrm)
     return socketSend->writeDatagram( (const char*)&dtgrm, dtgrm.Size + TDatagram2_HEADER_LN, groupAddress, port );
 }
 
-void GtNetB::bufferSend(const GtBuffer *B)
+void GtNetB::bufferSend(TDatagram2 dtgrm)
 {
-    TDatagram2 Data;
-    Data.Clear();
-    Data.setName(B->getName().toLocal8Bit().data());
-    Data.Type=B->getType();
-    Data.Size=B->A.size();
-    Data.setData(B->A.data(),B->A.size());
-    send(Data);
+        send(dtgrm);
 }
 
 
@@ -196,31 +192,38 @@ GtBuffers_UDP_D2::~GtBuffers_UDP_D2()
 
 int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &A)
 {
-    static GtBuffer B;
-    B.setType(type);
-    B.setName(name);
-    B.A=A;// setData(d,sz);
-    emit bufferSend(&B);
+    TDatagram2 Data;
+    Data.Clear();
+    Data.setName(name.toLocal8Bit().data());
+    Data.Type=type;
+    Data.Size=A.size();
+    if (Data.Size>sizeof(Data.Data)) Data.Size=sizeof(Data.Data);
+    Data.setData(A.data(),A.size());
+    emit bufferSend(Data);
     return 0;
 }
 
 int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
 {
-    emit bufferSend(B);
-    // QThread::msleep(20);
-    return 0;
+    if (slaveMode){
+       auto name=B->name;
+       if (!name.isEmpty())name[1]='_';
+       return sendData(B->type, name,B->A);
+    }else {
+        return sendData(B->type, B->name,B->A);
+    }
 }
 
-int GtBuffers_UDP_D2::emit_counter() const
+int GtBuffers_UDP_D2::get_emit_counter() const
 {
-    if (gtNetB!=nullptr) return gtNetB->emit_counter;
+    if (gtNetB!=nullptr) return emit_counter;
     return 0;
 }
 
 void GtBuffers_UDP_D2::bufferChanged(GtBuffer *B, TDatagram2 dtgrm)
 {
 
-    if (gtNetB!=nullptr) gtNetB->emit_counter--;
+    if (gtNetB!=nullptr) emit_counter--;
     B->tick++;
     B->timeDataChanged=B->timeDataRecived;
     if (B->A.size()!=dtgrm.Size) {

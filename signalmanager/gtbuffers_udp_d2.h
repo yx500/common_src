@@ -30,7 +30,7 @@ public:
     virtual ~GtNetB() override;
     void run() override ;
     size_t send(const TDatagram2& dtgrm);
-    QAtomicInteger<int> emit_counter;
+
 
 
 signals:
@@ -38,7 +38,7 @@ signals:
 
 public slots:
     //void dtgrmDataSend(const TDatagram2& Data);
-    void bufferSend(const GtBuffer *B);
+    void bufferSend(TDatagram2 dtgrm);
     void checkLiveStatus();
 
 
@@ -67,12 +67,13 @@ public:
     int sendData(int type,const QString &name,const QByteArray &A);
     int sendGtBuffer(const GtBuffer *B) override;
     int maxSizeData() override {return TDatagram2_DATA_LN;}
-    int emit_counter() const;
+    int get_emit_counter() const;
+    bool slaveMode=false;
 public slots:
     void bufferChanged(GtBuffer *B,TDatagram2 dtgrm);
 
 signals:
-void bufferSend(const GtBuffer *B);
+void bufferSend(TDatagram2 dtgrm);
 
 protected:
     GtNetB *gtNetB;

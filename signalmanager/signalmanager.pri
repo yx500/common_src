@@ -8,6 +8,7 @@ QT+= network
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/gtbuffers_memshared.h \
     $$PWD/signalsmanager.h \
     $$PWD/dmpacket2.h \
     $$PWD/q_gtnet.h \
@@ -17,6 +18,7 @@ HEADERS += \
     $$PWD/gtbuffers.h
 
 SOURCES += \
+    $$PWD/gtbuffers_memshared.cpp \
     $$PWD/signalsmanager.cpp \
     $$PWD/q_gtnet.cpp \
     $$PWD/signalchanel.cpp \ 

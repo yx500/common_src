@@ -8,7 +8,7 @@
 #include "gtbuffer.h"
 
 
-
+extern QAtomicInteger<int> emit_counter;
 
 class GtBuffers : public IGtBufferInterface
 {
