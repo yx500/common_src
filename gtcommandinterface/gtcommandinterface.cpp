@@ -8,6 +8,8 @@ GtCommandInterface::GtCommandInterface(QObject *parent, IGtBufferInterface *buff
     FSRC_ID=QString::number(QDateTime::currentDateTime().msecsTo(QDateTime(QDate(2019,01,01),QTime(0,0))) % 1000);
     GtBuffer *B1=buffers->getGtBuffer(100,"gt_tu_0");
     GtBuffer *B2=buffers->getGtBuffer(102,"gt_rtu_0");
+    B1->tu_style=true;
+    B2->tu_style=true;
     connect(B1,&GtBuffer::bufferChanged,this,&GtCommandInterface::bufferChanged);
     connect(B2,&GtBuffer::bufferChanged,this,&GtCommandInterface::bufferChanged);
 }
@@ -91,7 +93,10 @@ void GtCommandInterface::bufferChanged(GtBuffer *B)
 
 QString GtCommandInterface::newUID()
 {
-    return QString::number(QDateTime::currentDateTime().msecsTo(QDateTime(QDate(2019,01,01),QTime(0,0))));
+    auto id=QDateTime::currentDateTime().msecsTo(QDateTime(QDate(2019,01,01),QTime(0,0)));
+    if (id==_id) id++;
+    _id=id;
+    return QString::number(id);
 
 }
 

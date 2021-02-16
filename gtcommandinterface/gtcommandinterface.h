@@ -33,6 +33,7 @@ protected:
     GtBuffer _B2;
     QList<QString> l_sended_rtu;
     int cmd_count;
+    long _id=0;
 
 };
 

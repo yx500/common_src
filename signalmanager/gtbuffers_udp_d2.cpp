@@ -91,7 +91,7 @@ void GtNetB::readDatagrams()
                     if ((D!=nullptr)&& (!D->static_mode)&&(!D->shared_mem)){
                         D->timeDataRecived=QDateTime::currentDateTime();
                         // тут бы блокировку от чтения поставить
-                        if ((D->A.size()!=_dtgrm.Size) || (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) {
+                        if ((D->A.size()!=_dtgrm.Size) || (D->tu_style)|| (memcmp(D->A.data(),&_dtgrm.Data,_dtgrm.Size)!=0)) {
                             emit_counter++;
                             emit changeBuffer(D,_dtgrm);
                         }
@@ -128,7 +128,7 @@ size_t GtNetB::send(const TDatagram2& dtgrm)
 
 void GtNetB::bufferSend(TDatagram2 dtgrm)
 {
-        send(dtgrm);
+    send(dtgrm);
 }
 
 
@@ -143,14 +143,14 @@ void GtNetB::checkLiveStatus()
     if (BB==nullptr) return;
     QDateTime curTime=QDateTime::currentDateTime();
     foreach (GtBuffer *B, BB->allBuffers()) {
-        int sost=GtBuffer::_error;
-        if (B->msecPeriodLive>0){
+        int sost=GtBuffer::_alive;
+        if ((B->msecPeriodLive>0)&&(!B->static_mode)){
             if (B->timeDataRecived.isValid()){
-                if ((B->timeDataRecived.msecsTo(curTime)<=B->msecPeriodLive)){
-                    sost=GtBuffer::_alive;
+                if ((B->timeDataRecived.msecsTo(curTime)>B->msecPeriodLive)){
+                    sost=GtBuffer::_error;
                 }
             }
-        } else sost=GtBuffer::_alive;
+        }
         if (sost!=B->sost) {
             B->sost=sost;
         }
@@ -206,9 +206,9 @@ int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &
 int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
 {
     if (slaveMode){
-       auto name=B->name;
-       if (!name.isEmpty())name[1]='_';
-       return sendData(B->type, name,B->A);
+        auto name=B->name;
+        if (!name.isEmpty())name[1]='_';
+        return sendData(B->type, name,B->A);
     }else {
         return sendData(B->type, B->name,B->A);
     }
