@@ -69,6 +69,7 @@ public:
     int maxSizeData() override {return TDatagram2_DATA_LN;}
     int get_emit_counter() const;
     bool slaveMode=false;
+    bool no_send=false;
 public slots:
     void bufferChanged(GtBuffer *B,TDatagram2 dtgrm);
 

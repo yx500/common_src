@@ -192,6 +192,7 @@ GtBuffers_UDP_D2::~GtBuffers_UDP_D2()
 
 int GtBuffers_UDP_D2::sendData(int type, const QString &name, const QByteArray &A)
 {
+    if (no_send) return 0;
     TDatagram2 Data;
     Data.Clear();
     Data.setName(name.toLocal8Bit().data());
@@ -207,7 +208,7 @@ int GtBuffers_UDP_D2::sendGtBuffer(const GtBuffer *B)
 {
     if (slaveMode){
         auto name=B->name;
-        if (!name.isEmpty())name[1]='_';
+        if (!name.isEmpty())name[0]='_';
         return sendData(B->type, name,B->A);
     }else {
         return sendData(B->type, B->name,B->A);
