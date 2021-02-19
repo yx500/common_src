@@ -144,11 +144,9 @@ void GtNetB::checkLiveStatus()
     QDateTime curTime=QDateTime::currentDateTime();
     foreach (GtBuffer *B, BB->allBuffers()) {
         int sost=GtBuffer::_alive;
-        if ((B->msecPeriodLive>0)&&(!B->static_mode)){
-            if (B->timeDataRecived.isValid()){
-                if ((B->timeDataRecived.msecsTo(curTime)>B->msecPeriodLive)){
-                    sost=GtBuffer::_error;
-                }
+        if ((B->msecPeriodLive>0)&&(!B->static_mode)&&(!B->tu_style)){
+            if ((!B->timeDataRecived.isValid())||(B->timeDataRecived.msecsTo(curTime)>B->msecPeriodLive)){
+                sost=GtBuffer::_error;
             }
         }
         if (sost!=B->sost) {
